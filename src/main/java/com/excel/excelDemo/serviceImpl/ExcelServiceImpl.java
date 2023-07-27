@@ -1,12 +1,14 @@
 package com.excel.excelDemo.serviceImpl;
 
 import com.excel.excelDemo.entity.ExcelEntity;
+import com.excel.excelDemo.helper.CsvHelper;
 import com.excel.excelDemo.repository.ExcelRepo;
 import com.excel.excelDemo.service.ExcelService;
 import com.excel.excelDemo.util.ExcelGenerator;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.text.DateFormat;
@@ -29,5 +31,15 @@ public class ExcelServiceImpl implements ExcelService {
         List<ExcelEntity> excelEntityList = excelRepo.findAll();
         ExcelGenerator excelGenerator = new ExcelGenerator(excelEntityList);
         excelGenerator.generate(response);
+    }
+
+    @Override
+    public void save(MultipartFile file) {
+        try {
+            List<ExcelEntity> excelEntityList = CsvHelper.uploadCsv(file.getInputStream());
+            excelRepo.saveAll(excelEntityList);
+        } catch (IOException e) {
+            throw new RuntimeException("failed to store csv data"+e.getMessage());
+        }
     }
 }
